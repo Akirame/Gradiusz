@@ -7,9 +7,9 @@ import source.Reg;
 
 /**
  * ...
- * @author G
+ * @author ...
  */
-class Bullet extends FlxSprite 
+class BulletPlayer extends FlxSprite 
 {
 
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
@@ -18,13 +18,18 @@ class Bullet extends FlxSprite
 		
 	}
 	
-	override public function update(elapsed:Float):Void 
+		override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
 		velocity.set(Reg.camVelocityX + 250, 0);
+		OOB();
+		
+	}
+	
+	function OOB():Void 
+	{
 		if (x > FlxG.camera.scroll.x + FlxG.camera.width)
 			destroy();
-		
 	}
 	
 }

@@ -12,8 +12,8 @@ import source.Reg;
  */
 class Player extends FlxSprite 
 {
-	private var playerBullet:Bullet;
-	private var bulletGroup:FlxTypedGroup<Bullet>;
+	private var playerBullet:BulletPlayer;
+	private var bulletGroup:FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
@@ -44,39 +44,39 @@ class Player extends FlxSprite
 			velocity.y -= Reg.shipVelocityY;
 		if (FlxG.keys.pressed.DOWN)
 			velocity.y += Reg.shipVelocityY;
-		/*if (FlxG.keys.pressed.A && FlxG.keys.pressed.S)
+		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.DOWN)
 		{
-			velocity.x -= 70.5;
-			velocity.y += 70.5;
+			velocity.x *= 0.705;
+			velocity.y *= 0.705;
 		}
-		if (FlxG.keys.pressed.A && FlxG.keys.pressed.W)
+		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.UP)
 		{
-			velocity.x -= 70.5;
-			velocity.y -= 70.5;
+			velocity.x *= 0.705;
+			velocity.y *= 0.705;
 		}
-		if (FlxG.keys.pressed.W && FlxG.keys.pressed.D)
+		if (FlxG.keys.pressed.UP && FlxG.keys.pressed.RIGHT)
 		{
-			velocity.x += 70.5;
-			velocity.y -= 70.5;
-		}
-		if (FlxG.keys.pressed.S && FlxG.keys.pressed.D)
+			velocity.x *= 0.705;
+			 velocity.y *= 0.705;
+		}  
+		if (FlxG.keys.pressed.DOWN && FlxG.keys.pressed.RIGHT)
 		{
-			velocity.x += 70.5;
-			velocity.y += 70.5;
-		}
-		if ((FlxG.keys.pressed.S && FlxG.keys.pressed.W) || (FlxG.keys.pressed.A && FlxG.keys.pressed.D))
+			velocity.x *= 0.705;
+			 velocity.y *= 0.705;
+		}  
+		if ((FlxG.keys.pressed.DOWN && FlxG.keys.pressed.UP) || (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.RIGHT))
 		{
-			velocity.x += Reg.camVelocityX;
+			velocity.x = Reg.camVelocityX;
 			velocity.y = 0;
 		}
-		*/
+		
 	}
 	
 	function Shoot():Void 
 	{
 		if (FlxG.keys.justPressed.Z && delayShoot >= Reg.delay)
 		{
-			playerBullet = new Bullet(x + width,y + height / 4, AssetPaths.playerBullet__png); // experimental solamente para sprite de prueba
+			playerBullet = new BulletPlayer(x + width,y + height / 4, AssetPaths.playerBullet__png); // experimental solamente para sprite de prueba
 			bulletGroup.add(playerBullet);
 			FlxG.state.add(playerBullet);
 			delayShoot = 0;
