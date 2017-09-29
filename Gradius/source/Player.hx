@@ -27,23 +27,26 @@ class Player extends FlxSprite
 		velocity.set(Reg.camVelocityX, 0);
 		
 		PlayerMovement();
-		if (FlxG.keys.justPressed.K)
-		{
-			playerBullet = new Bullet(x,y, AssetPaths.playerBullet__png);
-			bulletGroup.add(playerBullet);
-			FlxG.state.add(bulletGroup);
-		}
+		Shoot();
+		if ( x + width > FlxG.camera.scroll.x + FlxG.camera.width)
+			x = FlxG.camera.scroll.x + FlxG.camera.width - width;
+		if ( x < FlxG.camera.scroll.x)
+			x = FlxG.camera.scroll.x;
+		if ( y < FlxG.camera.scroll.y)
+			y = FlxG.camera.scroll.y;
+		if ( y + height > FlxG.camera.scroll.y + FlxG.camera.height)
+			y = FlxG.camera.scroll.y + FlxG.camera.height - height;
 	}
 	
 	function PlayerMovement():Void 
 	{
-		if (FlxG.keys.pressed.A)
+		if (FlxG.keys.pressed.LEFT)
 			velocity.x -= 100;
-		if (FlxG.keys.pressed.D)
+		if (FlxG.keys.pressed.RIGHT)
 			velocity.x += 100;
-		if (FlxG.keys.pressed.W)
+		if (FlxG.keys.pressed.UP)
 			velocity.y -= 100;
-		if (FlxG.keys.pressed.S)
+		if (FlxG.keys.pressed.DOWN)
 			velocity.y += 100;
 		//if (FlxG.keys.pressed.A && FlxG.keys.pressed.S)
 		//{
@@ -70,6 +73,16 @@ class Player extends FlxSprite
 			//velocity.x += Reg.camVelocityX;
 			//velocity.y = 0;
 		//}
+	}
+	
+	function Shoot():Void 
+	{
+		if (FlxG.keys.justPressed.K)
+		{
+			playerBullet = new Bullet(x,y, AssetPaths.playerBullet__png);
+			bulletGroup.add(playerBullet);
+			FlxG.state.add(bulletGroup);
+		}
 	}
 	
 }
