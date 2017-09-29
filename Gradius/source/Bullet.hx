@@ -1,5 +1,6 @@
 package;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import source.Reg;
@@ -21,8 +22,8 @@ class Bullet extends FlxSprite
 	{
 		super.update(elapsed);
 		velocity.set(Reg.camVelocityX + 250, 0);
-		if (x > 1000)
-			kill();
+		if (x > FlxG.camera.scroll.x + FlxG.camera.width)
+			destroy();
 		
 	}
 	
