@@ -6,5 +6,5 @@ package source;
  */
 class Reg 
 {
-
+	inline static public var camVelocityX = 50;
 }
