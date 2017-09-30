@@ -13,7 +13,7 @@ import source.Reg;
 class Player extends FlxSprite 
 {
 	private var playerBullet:BulletPlayer;
-	private var bulletGroup:FlxTypedGroup<BulletPlayer>;
+	public var bulletGroup:FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
@@ -46,23 +46,23 @@ class Player extends FlxSprite
 			velocity.y += Reg.shipVelocityY;
 		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.DOWN)
 		{
-			velocity.x *= 0.705;
-			velocity.y *= 0.705;
+			velocity.x *= DiagonalVelocity();
+			velocity.y *= DiagonalVelocity();
 		}
 		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.UP)
 		{
-			velocity.x *= 0.705;
-			velocity.y *= 0.705;
+			velocity.x *= DiagonalVelocity();
+			velocity.y *= DiagonalVelocity();
 		}
 		if (FlxG.keys.pressed.UP && FlxG.keys.pressed.RIGHT)
 		{
-			velocity.x *= 0.705;
-			 velocity.y *= 0.705;
+			velocity.x *= DiagonalVelocity();
+			velocity.y *= DiagonalVelocity();
 		}  
 		if (FlxG.keys.pressed.DOWN && FlxG.keys.pressed.RIGHT)
 		{
-			velocity.x *= 0.705;
-			 velocity.y *= 0.705;
+			velocity.x *= DiagonalVelocity();
+			velocity.y *= DiagonalVelocity();
 		}  
 		if ((FlxG.keys.pressed.DOWN && FlxG.keys.pressed.UP) || (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.RIGHT))
 		{
@@ -95,6 +95,11 @@ class Player extends FlxSprite
 			y = FlxG.camera.scroll.y;
 		if ( y + height > FlxG.camera.scroll.y + FlxG.camera.height)
 			y = FlxG.camera.scroll.y + FlxG.camera.height - height;
+	}
+	
+	function DiagonalVelocity():Float
+	{
+		return ((Math.sqrt(Math.pow(Reg.shipVelocityX, 2) + Math.pow(Reg.shipVelocityY, 2))) / 2) / 100;
 	}
 	
 }
