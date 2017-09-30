@@ -15,5 +15,4 @@ class Enemy extends FlxSprite
 		super(X, Y, SimpleGraphic);
 		
 	}
-	
 }

@@ -18,11 +18,14 @@ class PlayState extends FlxState
 	private var loader:FlxOgmoLoader;
 	private var tilemap:FlxTilemap;
 	private var enemyGroup:FlxTypedGroup<Enemy>;
+	private var backGround2:FlxBackdrop;
 	
 	override public function create():Void
 	{
 		super.create();
 		backGround = new FlxBackdrop(AssetPaths.spaceBackground__png);
+		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5,0.5);
+		
 		FlxG.worldBounds.set(2400, 240);
 		enemyGroup = new FlxTypedGroup<Enemy>();
 		
@@ -44,6 +47,7 @@ class PlayState extends FlxState
 	
 		add(followPoint);
 		add(backGround);
+		add(backGround2);
 		add(p1);
 		add(tilemap);
 		add(enemyGroup);
@@ -58,13 +62,10 @@ class PlayState extends FlxState
 		FlxG.collide(tilemap, p1, CollideTilePlayer);
 		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet);
 		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy);
+		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy);
 	}
 	
-	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy) 
-	{
-		p1.bulletGroup.remove(b);
-		enemyGroup.remove(e);
-	}
+	
 	
 	private function placeEntities(entityName:String, entityData:Xml):Void
 	{
@@ -74,19 +75,22 @@ class PlayState extends FlxState
 		switch (entityName)
 		{
 			case "player":
-				p1 = new Player(x, y, AssetPaths.ship__png);
+				p1 = new Player(x, y);
 			case "enemy1":
 				var e:Enemy1 = new Enemy1(x, y);
 				e.makeGraphic(16, 16, 0xFF0000FF);
 				enemyGroup.add(e);
+				//e.kill();
 			case "enemy2":
 				var e:Enemy2 = new Enemy2(x, y);
 				e.makeGraphic(16, 16, 0xFFFF00FF);
 				enemyGroup.add(e);
+				//e.kill();
 			case "enemy3":
-				var e:Enemy1 = new Enemy1(x, y);
+				var e:Enemy3 = new Enemy3(x, y);
 				e.makeGraphic(16, 16, 0xFF00FFFF);
 				enemyGroup.add(e);
+				//e.kill();
 		}
 	}
 	
@@ -98,5 +102,17 @@ class PlayState extends FlxState
 	function CollideTilePlayer(t:FlxTilemap,p1:Player):Void
 	{
 		p1.destroy();	
+	}
+	
+	function CollidePlayerEnemy(e:Enemy,p:Player):Void 
+	{
+		e.revive();
+		p.destroy();
+	}
+	
+	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy) 
+	{
+		p1.bulletGroup.remove(b,true);
+		enemyGroup.remove(e);
 	}
 }

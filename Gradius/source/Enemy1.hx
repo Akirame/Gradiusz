@@ -24,7 +24,6 @@ class Enemy1 extends Enemy
 		velocity.set(Reg.camVelocityX, 0);		
 		Movement();
 	}
-	
 	function Movement():Void 
 	{
 		if (x < FlxG.camera.scroll.x + FlxG.camera.width / 2 || move == true)

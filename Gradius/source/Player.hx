@@ -16,12 +16,14 @@ class Player extends FlxSprite
 	public var bulletGroup:FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	
-	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
+	public function new(?X:Float=0, ?Y:Float=0) 
 	{
-		super(X, Y, SimpleGraphic);
+		super(X, Y);
+		loadGraphic(AssetPaths.animatedShip__png, true, 28, 16);
 		bulletGroup = new FlxTypedGroup();
 		FlxG.state.add(bulletGroup);
 		delayShoot = Reg.delay;
+		animation.add("prop", [0, 1, 2], 4, true);
 	}
 	
 	override public function update(elapsed:Float):Void 
@@ -30,6 +32,7 @@ class Player extends FlxSprite
 		velocity.set(Reg.camVelocityX, 0);
 		
 		PlayerMovement();
+		animation.play("prop");
 		Shoot();
 		OOB();
 	}
