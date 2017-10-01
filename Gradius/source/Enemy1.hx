@@ -10,7 +10,8 @@ import source.Reg;
  */
 class Enemy1 extends Enemy 
 {
-	var move:Bool;
+	private var move:Bool;
+	private var balita:BulletEnemy;
 
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
 	{
@@ -24,12 +25,16 @@ class Enemy1 extends Enemy
 		velocity.set(Reg.camVelocityX, 0);		
 		Movement();
 	}
+	
 	function Movement():Void 
 	{
 		if (x < FlxG.camera.scroll.x + FlxG.camera.width / 2 || move == true)
-				move = true;
+			move = true;
 		else
-				move = false;
+			move = false;
+		if (x < FlxG.camera.scroll.x + FlxG.camera.width / 2)
+			shoot();
+		
 		
 		if (move == true)
 		{
@@ -39,5 +44,13 @@ class Enemy1 extends Enemy
 		else
 			velocity.x -= 30;
 	}
+	
+	public function shoot() 
+	{
+		balita = new BulletEnemy(x, y + height / 2);
+		FlxG.state.add(balita);
+	}
+	
+	
 	
 }

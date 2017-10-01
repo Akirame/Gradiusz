@@ -19,11 +19,11 @@ class Player extends FlxSprite
 	public function new(?X:Float=0, ?Y:Float=0) 
 	{
 		super(X, Y);
-		loadGraphic(AssetPaths.animatedShip__png, true, 28, 16);
+		loadGraphic(AssetPaths.animatedShip__png, true, 32, 16);
 		bulletGroup = new FlxTypedGroup();
 		FlxG.state.add(bulletGroup);
 		delayShoot = Reg.delay;
-		animation.add("prop", [0, 1, 2], 4, true);
+		animation.add("anim", [0, 1, 2], 4, true);
 	}
 	
 	override public function update(elapsed:Float):Void 
@@ -32,7 +32,7 @@ class Player extends FlxSprite
 		velocity.set(Reg.camVelocityX, 0);
 		
 		PlayerMovement();
-		animation.play("prop");
+		animation.play("anim");
 		Shoot();
 		OOB();
 	}
@@ -79,7 +79,7 @@ class Player extends FlxSprite
 	{
 		if (FlxG.keys.justPressed.Z && delayShoot >= Reg.delay)
 		{
-			playerBullet = new BulletPlayer(x + width,y + height / 4, AssetPaths.playerBullet__png); // experimental solamente para sprite de prueba
+			playerBullet = new BulletPlayer(x + width,y + height / 4); // experimental solamente para sprite de prueba
 			bulletGroup.add(playerBullet);
 			FlxG.state.add(playerBullet);
 			delayShoot = 0;

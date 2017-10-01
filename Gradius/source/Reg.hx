@@ -6,7 +6,7 @@ package source;
  */
 class Reg 
 {
-	inline static public var camVelocityX = 50;
+	inline static public var camVelocityX = 30;
 	static public var shipVelocityX = 100;
 	static public var shipVelocityY = 100;
 	inline public static var delay = 15;

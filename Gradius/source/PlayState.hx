@@ -59,6 +59,7 @@ class PlayState extends FlxState
 	{
 		super.update(elapsed);
 		
+		
 		FlxG.collide(tilemap, p1, CollideTilePlayer);
 		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet);
 		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy);
