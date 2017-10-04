@@ -92,6 +92,10 @@ class PlayState extends FlxState
 				e.makeGraphic(16, 16, 0xFF00FFFF);
 				enemyGroup.add(e);
 				e.kill();
+			case "boss":
+				var boss:Boss = new Boss(x, y);
+				boss.makeGraphic(64, 64, 0xFF00FFFF);
+				boss.kill();
 		}
 	}
 	
