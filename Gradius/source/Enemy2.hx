@@ -44,7 +44,7 @@ class Enemy2 extends Enemy
 			velocity.y -= 50;
 		}
 		else
-			velocity.x -= 30;
+			velocity.x -= 50;
 	}
 
 	public function shoot()

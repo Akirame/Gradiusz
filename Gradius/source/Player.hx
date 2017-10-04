@@ -13,7 +13,7 @@ import source.Reg;
 class Player extends FlxSprite 
 {
 	private var playerBullet:BulletPlayer;
-	public var bulletGroup:FlxTypedGroup<BulletPlayer>;
+	public var bulletGroup(get, null):FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	
 	public function new(?X:Float=0, ?Y:Float=0) 
@@ -21,7 +21,6 @@ class Player extends FlxSprite
 		super(X, Y);
 		loadGraphic(AssetPaths.animatedShip__png, true, 32, 16);
 		bulletGroup = new FlxTypedGroup();
-		FlxG.state.add(bulletGroup);
 		delayShoot = Reg.delay;
 		animation.add("anim", [0, 1, 2], 4, true);
 	}
@@ -81,7 +80,6 @@ class Player extends FlxSprite
 		{
 			playerBullet = new BulletPlayer(x + width,y + height / 4); // experimental solamente para sprite de prueba
 			bulletGroup.add(playerBullet);
-			FlxG.state.add(playerBullet);
 			delayShoot = 0;
 		}
 		else
@@ -103,6 +101,11 @@ class Player extends FlxSprite
 	function DiagonalVelocity():Float
 	{
 		return ((Math.sqrt(Math.pow(Reg.shipVelocityX, 2) + Math.pow(Reg.shipVelocityY, 2))) / 2) / 100;
+	}
+	
+	function get_bulletGroup():FlxTypedGroup<BulletPlayer> 
+	{
+		return bulletGroup;
 	}
 	
 }

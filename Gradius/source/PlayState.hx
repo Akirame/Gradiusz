@@ -49,6 +49,7 @@ class PlayState extends FlxState
 		add(backGround);
 		add(backGround2);
 		add(p1);
+		add(p1.bulletGroup);
 		add(tilemap);
 		add(enemyGroup);
 	}
@@ -58,17 +59,16 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		
-		
-		FlxG.collide(tilemap, p1, CollideTilePlayer);
-		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet);
-		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy);
-		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy);
+		gameOver();
+		respawnEnemy();
+		FlxG.collide(tilemap, p1, CollideTilePlayer); // colision entre tiles y player
+		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet); // colision entre tiles y bullet
+		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy); //colision entre balas y enemigos
+		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy); // coliision entre enemigos y player
 	}
+		
 	
-	
-	
-	private function placeEntities(entityName:String, entityData:Xml):Void
+	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
 	{
 		var x:Int = Std.parseInt(entityData.get("x"));
 		var y:Int = Std.parseInt(entityData.get("y"));
@@ -81,39 +81,62 @@ class PlayState extends FlxState
 				var e:Enemy1 = new Enemy1(x, y);
 				e.makeGraphic(16, 16, 0xFF0000FF);
 				enemyGroup.add(e);
-				//e.kill();
+				e.kill();
 			case "enemy2":
 				var e:Enemy2 = new Enemy2(x, y);
 				e.makeGraphic(16, 16, 0xFFFF00FF);
 				enemyGroup.add(e);
-				//e.kill();
+				e.kill();
 			case "enemy3":
 				var e:Enemy3 = new Enemy3(x, y);
 				e.makeGraphic(16, 16, 0xFF00FFFF);
 				enemyGroup.add(e);
-				//e.kill();
+				e.kill();
 		}
 	}
 	
-	function CollideTileBullet(t:FlxTilemap,b:BulletPlayer) 
+	function CollideTileBullet(t:FlxTilemap,b:BulletPlayer) // colision entre tiles y bullet
 	{
-		p1.bulletGroup.remove(b, true);
+		p1.bulletGroup.remove(b,true);
 	}
 	
-	function CollideTilePlayer(t:FlxTilemap,p1:Player):Void
+	function CollideTilePlayer(t:FlxTilemap,p1:Player):Void	// colision entre tiles y player
 	{
+		playerDeath();
 		p1.destroy();	
 	}
 	
-	function CollidePlayerEnemy(e:Enemy,p:Player):Void 
+	function CollidePlayerEnemy(e:Enemy,p:Player):Void // colision entre player y enemigo
 	{
-		e.revive();
+		playerDeath();
 		p.destroy();
 	}
 	
-	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy) 
+	function playerDeath():Void // player death
+	{
+		Reg.lives--;
+		FlxG.resetState();
+	}
+	
+	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy)  // colision entre bala y enemigo
 	{
 		p1.bulletGroup.remove(b,true);
 		enemyGroup.remove(e);
+	}
+	
+	function respawnEnemy():Void // respawnear y matar enemigos
+	{
+		for ( enemy in enemyGroup)
+		{
+			if ( (enemy.x <= (FlxG.camera.scroll.x + FlxG.camera.width + 10)) && enemy.alive == false)
+				enemy.revive();
+			if ((enemy.x >=  FlxG.camera.scroll.x + FlxG.camera.width + 30 || enemy.x <= FlxG.camera.scroll.x-20) && enemy.alive)
+				enemyGroup.remove(enemy, true);
+		}
+	}
+	function gameOver():Void 
+	{
+		if ( Reg.lives < 0)
+			FlxG.resetState();
 	}
 }
