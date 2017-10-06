@@ -1,6 +1,7 @@
 package;
 
 import flixel.FlxG;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.math.FlxAngle;
 import source.Reg;
@@ -14,10 +15,12 @@ class Boss extends Enemy
 	private var toDown:Bool;
 	private var countDown:Int;
 	private var balita:BulletEnemy;
+	var bulletGroupRef:FlxTypedGroup<BulletEnemy>;
 	
-	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) 
+	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
-		super(X, Y, SimpleGraphic);
+		super(X, Y, SimpleGraphic, bulletGroup);
+		bulletGroupRef = bulletGroup;
 		toDown = false;
 		countDown = 0;
 	}
@@ -48,15 +51,17 @@ class Boss extends Enemy
 			
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.velocity.set( -vel, 0);
-			FlxG.state.add(balita);
+			bulletGroupRef.add(balita);
 			
 			balita = new BulletEnemy(x, y + height / 2);
+			balita.angle = 45;
 			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(-45)), vel * Math.sin(FlxAngle.asDegrees(-45)));
-			FlxG.state.add(balita);
+			bulletGroupRef.add(balita);
 			
 			balita = new BulletEnemy(x, y + height / 2);
+			balita.angle = -45;
 			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(45)), vel * Math.sin(FlxAngle.asDegrees(45)));
-			FlxG.state.add(balita);
+			bulletGroupRef.add(balita);
 			
 			countDown = 0;
 		}

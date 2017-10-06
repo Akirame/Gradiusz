@@ -8,6 +8,7 @@ import flixel.addons.display.FlxBackdrop;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.system.debug.interaction.tools.Eraser.GraphicEraserTool;
 import flixel.tile.FlxTilemap;
+import flixel.ui.FlxBar;
 import source.Reg;
 import flixel.addons.editors.ogmo.FlxOgmoLoader;
 
@@ -20,8 +21,9 @@ class PlayState extends FlxState
 	private var tilemap:FlxTilemap;
 	private var enemyGroup:FlxTypedGroup<Enemy>;
 	private var backGround2:FlxBackdrop;
-	var bossito:Boss;
-	
+	private var bossito:Boss;
+	private var bulletGroup:FlxTypedGroup<BulletEnemy>;
+	private var bossHPBar:FlxBar;
 	override public function create():Void
 	{
 		super.create();
@@ -30,6 +32,10 @@ class PlayState extends FlxState
 		
 		FlxG.worldBounds.set(2400, 240);
 		enemyGroup = new FlxTypedGroup<Enemy>();
+		bulletGroup = new FlxTypedGroup<BulletEnemy>();
+		bossHPBar = new FlxBar(FlxG.camera.scroll.x + FlxG.camera.width/2+40, 2, LEFT_TO_RIGHT, 100, 10, Reg, "bossHP", 0, 100);
+		bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
+		
 		
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles2__png, 16, 16, "tiles");
@@ -55,6 +61,7 @@ class PlayState extends FlxState
 		add(tilemap);
 		add(enemyGroup);
 		add(bossito);
+		add(bulletGroup);
 	}
 	
 	
@@ -71,7 +78,10 @@ class PlayState extends FlxState
 			Reg.camVelocityX = 0;
 			followPoint.velocity.x = Reg.camVelocityX;
 			if (bossito.alive == false)
+			{
 				bossito.revive();
+				add(bossHPBar);
+			}
 		}
 	}
 		
@@ -86,22 +96,22 @@ class PlayState extends FlxState
 			case "player":
 				p1 = new Player(x, y);
 			case "enemy1":
-				var e:Enemy1 = new Enemy1(x, y);
+				var e:Enemy1 = new Enemy1(x, y, null, bulletGroup);
 				e.makeGraphic(16, 16, 0xFF0000FF);
 				enemyGroup.add(e);
 				e.kill();
 			case "enemy2":
-				var e:Enemy2 = new Enemy2(x, y);
+				var e:Enemy2 = new Enemy2(x, y,null, bulletGroup);
 				e.makeGraphic(16, 16, 0xFFFF00FF);
 				enemyGroup.add(e);
 				e.kill();
 			case "enemy3":
-				var e:Enemy3 = new Enemy3(x, y);
+				var e:Enemy3 = new Enemy3(x, y, null, bulletGroup);
 				e.makeGraphic(16, 16, 0xFF00FFFF);
 				enemyGroup.add(e);
 				e.kill();
 			case "boss":
-				bossito = new Boss(x, y);
+				bossito = new Boss(x, y, null, bulletGroup);
 				bossito.makeGraphic(64, 64, 0xFF00FFFF);
 				bossito.kill();				
 		}
@@ -139,12 +149,18 @@ class PlayState extends FlxState
 		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy); //colision entre balas y enemigos
 		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy); // coliision entre enemigos y player
 		FlxG.overlap(bossito, p1.bulletGroup, CollideBossAndBullet); // colision boss y bullet
-		FlxG.collide(bossito, p1, CollideBossAndPlayer);		
+		FlxG.collide(bulletGroup, p1, CollideEnemyBulletAndPlayer);
+	}
+	
+	function CollideEnemyBulletAndPlayer(b:BulletEnemy,p:Player)
+	{
+		p.destroy();
+		bulletGroup.remove(b);
 	}
 	
 	function CollideBossAndPlayer(b:Boss, p:Player)
 	{
-		p1.kill();
+		p.destroy();
 	}
 	
 	function CollideBossAndBullet(b:Boss, p:BulletPlayer)
@@ -158,10 +174,10 @@ class PlayState extends FlxState
 		p1.bulletGroup.remove(b,true);
 	}
 	
-	function CollideTilePlayer(t:FlxTilemap,p1:Player):Void	// colision entre tiles y player
+	function CollideTilePlayer(t:FlxTilemap,p:Player):Void	// colision entre tiles y player
 	{
 		PlayerDeath();
-		p1.destroy();	
+		p.destroy();	
 	}
 	
 	function CollidePlayerEnemy(e:Enemy,p:Player):Void // colision entre player y enemigo

@@ -14,11 +14,13 @@ class Enemy3 extends Enemy
 {
 	private var countDown:Int;
 	private var acum:Int;
-	public var balita:BulletEnemy;
+	private var balita:BulletEnemy;
+	var bulletGroupRef:FlxTypedGroup<BulletEnemy>;
 
-	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset)
+	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
-		super(X, Y, SimpleGraphic);
+		super(X, Y, SimpleGraphic, bulletGroup);
+		bulletGroupRef = bulletGroup;
 		countDown = 0;
 		acum = 0;	
 	}
@@ -63,6 +65,6 @@ class Enemy3 extends Enemy
 	public function Shoot()
 	{
 		balita = new BulletEnemy(x, y + height/2);
-		FlxG.state.add(balita);
+		bulletGroupRef.add(balita);
 	}
 }
