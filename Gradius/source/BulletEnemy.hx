@@ -17,13 +17,13 @@ class BulletEnemy extends FlxSprite
 		super(X, Y);
 		loadGraphic(AssetPaths.enemyBullet__png, true, 16, 16);
 		animation.add("anim", [0, 1], 10, true);
+		velocity.set(Reg.camVelocityX - 150, 0);
 	}
 	
 		
 	override public function update(elapsed:Float):Void 
 	{
 		super.update(elapsed);
-		velocity.set(Reg.camVelocityX - 150, 0);
 		animation.play("anim");
 		OOB();
 	}

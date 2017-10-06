@@ -14,7 +14,7 @@ class Enemy3 extends Enemy
 {
 	private var countDown:Int;
 	private var acum:Int;
-	private var balita:BulletEnemy;
+	public var balita:BulletEnemy;
 
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset)
 	{
@@ -36,7 +36,7 @@ class Enemy3 extends Enemy
 			else
 				acum++;
 			countDown = 0;	
-			shoot();
+			Shoot();
 		}
 		else
 			countDown++;
@@ -60,7 +60,7 @@ class Enemy3 extends Enemy
 		}
 	}
 	
-	public function shoot()
+	public function Shoot()
 	{
 		balita = new BulletEnemy(x, y + height/2);
 		FlxG.state.add(balita);

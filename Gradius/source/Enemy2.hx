@@ -36,7 +36,7 @@ class Enemy2 extends Enemy
 			move = false;
 		
 		if (x < FlxG.camera.scroll.x + FlxG.camera.width / 2)
-			shoot();
+			Shoot();
 
 		if (move == true)
 		{
@@ -47,7 +47,7 @@ class Enemy2 extends Enemy
 			velocity.x -= 50;
 	}
 
-	public function shoot()
+	public function Shoot()
 	{
 		balita = new BulletEnemy(x, y + height/2);
 		FlxG.state.add(balita);
