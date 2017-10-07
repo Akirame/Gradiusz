@@ -23,20 +23,20 @@ class PlayState extends FlxState
 	private var backGround2:FlxBackdrop;
 	private var bossito:Boss;
 	private var bulletGroup:FlxTypedGroup<BulletEnemy>;
-	private var bossHPBar:FlxBar;
+	var upgradecito:Upgrade;
+	var bossHPBar:FlxBar;
+	
 	override public function create():Void
 	{
 		super.create();
 		backGround = new FlxBackdrop(AssetPaths.spaceBackground__png);
 		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5,0.5);
 		
+		Init();
 		FlxG.worldBounds.set(2400, 240);
 		enemyGroup = new FlxTypedGroup<Enemy>();
 		bulletGroup = new FlxTypedGroup<BulletEnemy>();
-		bossHPBar = new FlxBar(FlxG.camera.scroll.x + FlxG.camera.width/2+40, 2, LEFT_TO_RIGHT, 100, 10, Reg, "bossHP", 0, 100);
-		bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
-		
-		
+
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles2__png, 16, 16, "tiles");
 		for (i in 0...11)
@@ -47,24 +47,38 @@ class PlayState extends FlxState
 				tilemap.setTileProperties(i, FlxObject.ANY);
 		}
 		loader.loadEntities(placeEntities, "entities");
-		
+	
 		followPoint = new FlxSprite(FlxG.width / 2, FlxG.height / 2);
 		followPoint.makeGraphic(1, 1, 0x00000000);
 		followPoint.velocity.x = Reg.camVelocityX;
 		FlxG.camera.follow(followPoint);
-	
+
+		upgradecito = new Upgrade(200, 50);
+		
+
 		add(followPoint);
 		add(backGround);
 		add(backGround2);
+		add(tilemap);
 		add(p1);
 		add(p1.bulletGroup);
-		add(tilemap);
 		add(enemyGroup);
 		add(bossito);
 		add(bulletGroup);
+		add(upgradecito);
 	}
 	
-	
+	function Init() 
+	{
+		Reg.camVelocityX = 30;
+		Reg.countUpgrade = 0;
+		Reg.missileUpgrade = false;
+		Reg.optionUpgrade = false;
+		Reg.shieldUpgrade = 0;
+		Reg.shipVelocityX  = 100;
+		Reg.shipVelocityY = 100;
+		Reg.bossHP = 100;
+	}
 
 	override public function update(elapsed:Float):Void
 	{
@@ -72,7 +86,7 @@ class PlayState extends FlxState
 		GameOver();
 		RespawnEnemy();
 		Collides();
-		
+
 		if (followPoint.x >= tilemap.width - 2200 )
 		{
 			Reg.camVelocityX = 0;
@@ -80,17 +94,20 @@ class PlayState extends FlxState
 			if (bossito.alive == false)
 			{
 				bossito.revive();
+				bossHPBar = new FlxBar((FlxG.camera.scroll.x + FlxG.camera.width-75)/2,2, LEFT_TO_RIGHT, 150, 20, Reg, "bossHP", 0, 100);
+				bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
 				add(bossHPBar);
 			}
+			if (Reg.bossHP == 0)
+				bossHPBar.destroy();
 		}
 	}
-		
-	
+
 	private function placeEntities(entityName:String, entityData:Xml):Void // inicializar entidades
 	{
 		var x:Int = Std.parseInt(entityData.get("x"));
 		var y:Int = Std.parseInt(entityData.get("y"));
-		
+
 		switch (entityName)
 		{
 			case "player":
@@ -113,18 +130,12 @@ class PlayState extends FlxState
 			case "boss":
 				bossito = new Boss(x, y, null, bulletGroup);
 				bossito.makeGraphic(64, 64, 0xFF00FFFF);
-				bossito.kill();				
+				bossito.kill();
 		}
 	}
-	
-	
-	function PlayerDeath():Void // player death
-	{
-		Reg.lives--;
-		FlxG.resetState();
-	}
 
-	
+
+
 	function RespawnEnemy():Void // respawnear y matar enemigos
 	{
 		for ( enemy in enemyGroup)
@@ -134,61 +145,85 @@ class PlayState extends FlxState
 			if ((enemy.x >=  FlxG.camera.scroll.x + FlxG.camera.width + 30 || enemy.x <= FlxG.camera.scroll.x-20) && enemy.alive)
 				enemyGroup.remove(enemy, true);
 		}
-		
 	}
-	function GameOver():Void 
+	
+		function PlayerDeath():Void // player death
+	{
+			Reg.lives--;
+			FlxG.resetState();
+	}
+	
+	function GameOver():Void // Gameover?
 	{
 		if ( Reg.lives < 0)
 			FlxG.resetState();
 	}
 	
-	function Collides():Void 
+	function ShieldOK() // Shield activado?
+	{
+		if (Reg.shieldUpgrade == 0)
+			PlayerDeath();
+		else
+			Reg.shieldUpgrade--;
+	}
+
+	function Collides():Void
 	{
 		FlxG.collide(tilemap, p1, CollideTilePlayer); // colision entre tiles y player
 		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet); // colision entre tiles y bullet
 		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy); //colision entre balas y enemigos
 		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy); // coliision entre enemigos y player
 		FlxG.overlap(bossito, p1.bulletGroup, CollideBossAndBullet); // colision boss y bullet
-		FlxG.collide(bulletGroup, p1, CollideEnemyBulletAndPlayer);
+		FlxG.collide(bulletGroup, p1, CollideEnemyBulletAndPlayer); // colision entre bala enemiga y player
+		FlxG.overlap(upgradecito, p1, CollidePlayerUpgrade); // colision entre uptrade y player
+		FlxG.collide(bossito, p1, CollideBossAndPlayer); // colision entre boss y player
 	}
-	
-	function CollideEnemyBulletAndPlayer(b:BulletEnemy,p:Player)
+
+	function CollidePlayerUpgrade(u:Upgrade, p:Player) //colision entre upgrade y player
 	{
-		p.destroy();
+		u.destroy();
+		if (Reg.countUpgrade < 5)
+			Reg.countUpgrade += 2;
+		else
+			Reg.countUpgrade = 0;
+	}
+
+	function CollideEnemyBulletAndPlayer(b:BulletEnemy,p:Player) //colision entre bala enemiga y player
+	{
+		ShieldOK();
 		bulletGroup.remove(b);
 	}
+
 	
-	function CollideBossAndPlayer(b:Boss, p:Player)
-	{
-		p.destroy();
-	}
-	
-	function CollideBossAndBullet(b:Boss, p:BulletPlayer)
+	function CollideBossAndBullet(b:Boss, p:BulletPlayer) //colision bala player y boss
 	{
 		p1.bulletGroup.remove(p);
 		Reg.bossHP -= 10;
 	}
-	
-	function CollideTileBullet(t:FlxTilemap,b:BulletPlayer) // colision entre tiles y bullet
+
+	function CollideTileBullet(t:FlxTilemap,b:BulletPlayer) // colision entre tiles y bullet player
 	{
 		p1.bulletGroup.remove(b,true);
 	}
+
+	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy)  // colision entre bala player y enemigo
+	{
+		p1.bulletGroup.remove(b,true);
+		enemyGroup.remove(e);
+	}
 	
-	function CollideTilePlayer(t:FlxTilemap,p:Player):Void	// colision entre tiles y player
+	function CollideBossAndPlayer(b:Boss, p:Player) //colision player y boss
 	{
 		PlayerDeath();
-		p.destroy();	
 	}
 	
 	function CollidePlayerEnemy(e:Enemy,p:Player):Void // colision entre player y enemigo
 	{
-		PlayerDeath();
-		p.destroy();
+		PlayerDeath();		
 	}
-	
-		function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy)  // colision entre bala y enemigo
+
+	function CollideTilePlayer(t:FlxTilemap,p:Player):Void	// colision entre player y tiles
 	{
-		p1.bulletGroup.remove(b,true);
-		enemyGroup.remove(e);
+		PlayerDeath();
 	}
 }

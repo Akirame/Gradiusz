@@ -22,28 +22,25 @@ class Enemy3 extends Enemy
 		super(X, Y, SimpleGraphic, bulletGroup);
 		bulletGroupRef = bulletGroup;
 		countDown = 0;
-		acum = 0;	
+		acum = 0;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		velocity.set(Reg.camVelocityX, 0);
-			
-		
+
 		if ( countDown == 50)
 		{
 			if (acum == 3)
 				acum = 0;
 			else
 				acum++;
-			countDown = 0;	
+			countDown = 0;
 			Shoot();
 		}
 		else
 			countDown++;
-			
-		
 
 		switch (acum)
 		{
@@ -61,7 +58,7 @@ class Enemy3 extends Enemy
 				velocity.y += 50;
 		}
 	}
-	
+
 	public function Shoot()
 	{
 		balita = new BulletEnemy(x, y + height/2);

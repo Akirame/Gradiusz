@@ -36,7 +36,7 @@ class Enemy2 extends Enemy
 		}
 		else
 			move = false;
-		
+
 		if (x < FlxG.camera.scroll.x + FlxG.camera.width / 2)
 			Shoot();
 

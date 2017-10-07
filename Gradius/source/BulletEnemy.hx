@@ -9,31 +9,28 @@ import source.Reg;
  * ...
  * @author G
  */
-class BulletEnemy extends FlxSprite 
+class BulletEnemy extends FlxSprite
 {
 
-	public function new(?X:Float=0, ?Y:Float=0) 
+	public function new(?X:Float=0, ?Y:Float=0)
 	{
 		super(X, Y);
 		loadGraphic(AssetPaths.enemyBullet__png, true, 16, 16);
 		animation.add("anim", [0, 1], 10, true);
 		velocity.set(Reg.camVelocityX - 150, 0);
 	}
-	
-		
-	override public function update(elapsed:Float):Void 
+
+	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 		animation.play("anim");
 		OOB();
 	}
-	
-	function OOB():Void 
+
+	function OOB():Void
 	{
 		if ( x < FlxG.camera.scroll.x)
 			destroy();
 	}
-	
-	
-	
+
 }

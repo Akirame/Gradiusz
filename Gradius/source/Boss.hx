@@ -4,31 +4,33 @@ import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.math.FlxAngle;
+import flixel.ui.FlxBar;
 import source.Reg;
 
 /**
  * ...
  * @author ...
  */
-class Boss extends Enemy 
+class Boss extends Enemy
 {
 	private var toDown:Bool;
 	private var countDown:Int;
 	private var balita:BulletEnemy;
-	var bulletGroupRef:FlxTypedGroup<BulletEnemy>;
-	
+	private var bulletGroupRef:FlxTypedGroup<BulletEnemy>;
+
 	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
 		super(X, Y, SimpleGraphic, bulletGroup);
 		bulletGroupRef = bulletGroup;
 		toDown = false;
 		countDown = 0;
+		
 	}
-	
-	override public function update(elapsed:Float):Void 
+
+	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		velocity.set(0, 0);		
+		velocity.set(0, 0);
 		OOB();
 		if (x <= FlxG.camera.scroll.x + FlxG.camera.width - 84)
 		{
@@ -42,51 +44,53 @@ class Boss extends Enemy
 		}
 		isAlive();
 	}
-	
-	function Shoot() 
+
+	function Shoot()
 	{
 		if (countDown >= 1 * FlxG.updateFramerate)
 		{
 			var vel:Float = 150;
-			
+
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.velocity.set( -vel, 0);
 			bulletGroupRef.add(balita);
-			
+
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.angle = 45;
 			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(-45)), vel * Math.sin(FlxAngle.asDegrees(-45)));
 			bulletGroupRef.add(balita);
-			
+
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.angle = -45;
 			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(45)), vel * Math.sin(FlxAngle.asDegrees(45)));
 			bulletGroupRef.add(balita);
-			
+
 			countDown = 0;
 		}
 		else
 			countDown++;
 	}
-	function isAlive() 
+	function isAlive()
 	{
 		if (Reg.bossHP <= 0)
+		{
 			destroy();
+		}
 	}
-	
-	function OOB() 
+
+	function OOB()
 	{
 		if (y <= FlxG.camera.y && toDown == false)
 			toDown = true;
 		if (y >= FlxG.camera.y + FlxG.camera.height - height && toDown == true)
 			toDown = false;
 	}
-	
-	function Movement() 
+
+	function Movement()
 	{
 		if (toDown == false)
 			velocity.y -= 40;
 		else
 			velocity.y += 40;
 	}
-}	
+}
