@@ -32,8 +32,10 @@ class Enemy4 extends Enemy
 
 	public function Shoot()
 	{
+			
 		if ( count == 1 * FlxG.updateFramerate)
 		{		
+		FlxG.sound.play(AssetPaths.EnemyShoot__wav, 0.70,false);
 		balita = new BulletEnemy(x, y + height / 2);
 		balita.angle = -45;
 		balita.velocity.set (Reg.velocityBullet * Math.cos(FlxAngle.asDegrees( 45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(45)));

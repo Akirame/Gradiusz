@@ -88,6 +88,7 @@ class Player extends FlxSprite
 		{
 			playerBullet = new BulletPlayer(x + width,y + height / 4); // experimental solamente para sprite de prueba
 			bulletGroupRef.add(playerBullet);
+			FlxG.sound.play(AssetPaths.LaserShoot__wav, 0.80);
 			if (Reg.missileUpgrade)
 			{
 				playerMissile = new MissilePlayer(x + width, y + height / 4);
@@ -146,7 +147,8 @@ class Player extends FlxSprite
 			{
 			case 1:
 				if (Reg.countSpeed != 2)
-				{
+				{					
+					FlxG.sound.play(AssetPaths.Upgrade2__wav, 0.80);
 					Reg.shipVelocityX += 10;
 					Reg.shipVelocityY += 10;
 					Reg.countUpgrade = 0;
@@ -155,6 +157,7 @@ class Player extends FlxSprite
 				case 2:
 					if (Reg.shieldbool == false)
 					{
+					FlxG.sound.play(AssetPaths.Upgrade2__wav, 0.80);
 					Reg.shieldbool = true;
 					Reg.shieldUpgrade = 2;
 					Reg.countUpgrade = 0;
@@ -162,12 +165,14 @@ class Player extends FlxSprite
 				case 3:
 					if (Reg.missileUpgrade != true)
 					{
+					FlxG.sound.play(AssetPaths.Upgrade2__wav, 0.80);
 					Reg.missileUpgrade = true;
 					Reg.countUpgrade = 0;
 					}
 				case 4:
 					if (optionsito.alive == false)
 					{
+					FlxG.sound.play(AssetPaths.Upgrade2__wav, 0.80);
 					Reg.optionUpgrade = true;
 					optionsito.reset(x - 16, y + 16);
 					Reg.countUpgrade = 0;

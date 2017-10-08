@@ -52,7 +52,7 @@ class Boss extends Enemy
 	{
 		if (countDown >= 0.7 * FlxG.updateFramerate)
 		{
-			
+			FlxG.sound.play(AssetPaths.EnemyShoot__wav, 0.70);	
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.velocity.set( -Reg.velocityBullet, 0);
 			bulletGroupRef.add(balita);
@@ -68,6 +68,7 @@ class Boss extends Enemy
 			bulletGroupRef.add(balita);
 
 			countDown = 0;
+			FlxG.sound.play(AssetPaths.EnemyShoot__wav, 0.70,false);
 		}
 		else
 			countDown++;
@@ -76,6 +77,9 @@ class Boss extends Enemy
 	{
 		if (Reg.bossHP <= 0)
 		{
+			Reg.score += 1000;
+			FlxG.sound.pause();
+			FlxG.sound.play(AssetPaths.End__wav);
 			destroy();
 		}
 	}

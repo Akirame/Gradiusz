@@ -53,6 +53,7 @@ class Enemy1 extends Enemy
 
 	public function Shoot()
 	{
+		
 		balita = new BulletEnemy(x, y + height / 2);
 		balita.angle = 45;
 		balita.velocity.set( Reg.velocityBullet * Math.cos(FlxAngle.asDegrees(-45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(-45)));
@@ -62,5 +63,6 @@ class Enemy1 extends Enemy
 		balita.angle = -45;
 		balita.velocity.set( Reg.velocityBullet * Math.cos(FlxAngle.asDegrees(45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(45)));
 		bulletGroupRef.add(balita);
+		FlxG.sound.play(AssetPaths.EnemyShoot__wav, 0.70,false);
 	}
 }

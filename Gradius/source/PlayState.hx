@@ -33,17 +33,23 @@ class PlayState extends FlxState
 	private var contaUpgrade:Int;
 	private var HUDlives:FlxSprite;
 	private var HUDlivesText:FlxText;
+	private var HUDscore:FlxText;
+	private var contaDeath:Int;
+	private var endBackground:FlxBackdrop;
+	private var countEnd:Int;
+	private var countSwitch:Int;
 
 	override public function create():Void
 	{
 		super.create();
 		Init();
-		
+
 		backGround = new FlxBackdrop(AssetPaths.spaceBackground__png);
-		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5,0.5);
+		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5, 0.5);
+		endBackground = new FlxBackdrop(AssetPaths.end__png);
+		endBackground.alpha = 0;
 		add(backGround);
 		add(backGround2);
-	
 
 		enemyGroup = new FlxTypedGroup<Enemy>();
 		bulletGroup = new FlxTypedGroup<BulletEnemy>();
@@ -53,7 +59,6 @@ class PlayState extends FlxState
 
 		LoadTilemap();
 		FlxG.worldBounds.set(tilemap.width, tilemap.height);
-
 
 		followPoint = new FlxSprite(FlxG.width / 2, FlxG.height / 2);
 		followPoint.makeGraphic(1, 1, 0x00000000);
@@ -67,7 +72,7 @@ class PlayState extends FlxState
 		add(HUDShield);
 		add(HUDMissile);
 		add(HUDOption);
-		
+
 		add(enemyGroup);
 		add(bossito);
 		add(bulletPlayerGroup);
@@ -75,31 +80,38 @@ class PlayState extends FlxState
 		add(upgradecito);
 		add(p1);
 		add(p1.optionsito);
+		add(endBackground);
+		FlxG.sound.playMusic(AssetPaths.MainTheme__Wav, 1, false);
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		GameOver();
+		GameOverCheck();
 		HUDUpdate();
 		RespawnEnemy();
 		Collides();
 		BossRespawn();
+		UpdateScore();
 	}
 
 	function Init()
 	{
 		Reg.camVelocityX = 30;
+		Reg.shipVelocityX  = 100;
+		Reg.shipVelocityY = 100;
+		Reg.bossHP = 100;
 		Reg.countUpgrade = 0;
 		Reg.missileUpgrade = false;
 		Reg.optionUpgrade = false;
 		Reg.shieldUpgrade = 0;
 		Reg.shieldbool = false;
-		Reg.shipVelocityX  = 100;
-		Reg.shipVelocityY = 100;
-		Reg.bossHP = 100;
 		Reg.countSpeed = 0;
 		contaUpgrade = 0;
+		Reg.score = 0;
+		contaDeath = 0;
+		countEnd = 0;
+		countSwitch = 0;
 	}
 
 	function HUDUpdate()
@@ -168,7 +180,7 @@ class PlayState extends FlxState
 		switch (entityName)
 		{
 			case "player":
-				p1 = new Player(x, y, bulletPlayerGroup);				
+				p1 = new Player(x, y, bulletPlayerGroup);
 			case "enemy1":
 				var e:Enemy1 = new Enemy1(x, y, null, bulletGroup);
 				enemyGroup.add(e);
@@ -208,14 +220,36 @@ class PlayState extends FlxState
 
 	function PlayerDeath():Void // player death
 	{
+		FlxG.sound.pause();
+		FlxG.sound.play(AssetPaths.Death__wav,1,false);
 		Reg.lives--;
-		FlxG.resetState();
+		HUDlivesText.destroy();
+		HUDlivesText = new FlxText(33, 0, 0, "x " + Reg.lives, 16);
+		HUDlivesText.scrollFactor.set(0, 0);
+		add(HUDlivesText);
+		p1.kill();
+
 	}
 
-	function GameOver():Void // Gameover?
+	function GameOverCheck():Void // Gameover?
 	{
 		if ( Reg.lives < 1)
-			FlxG.resetGame();
+			FlxG.switchState(new GameOver());
+		if (!p1.alive)
+		{
+
+			if (contaDeath < 3 * FlxG.updateFramerate)
+			{
+				contaDeath++;
+			}
+			else
+				FlxG.resetState();
+		}
+		if (Reg.bossHP <= 0)
+		{
+			EndScene();
+		}
+
 	}
 
 	function ShieldOK() // Shield activado?
@@ -241,8 +275,12 @@ class PlayState extends FlxState
 	function CollidePlayerUpgrade(u:Upgrade, p:Player) //colision entre upgrade y player
 	{
 		u.kill();
+		FlxG.sound.play(AssetPaths.Upgrade__wav, 0.80);
+		Reg.score += 50;
+		HUDscore.destroy();
+		ScoreTextDraw();
 		if (Reg.countUpgrade < 5)
-			Reg.countUpgrade = 4;
+			Reg.countUpgrade++;
 		else
 			Reg.countUpgrade = 0;
 	}
@@ -256,7 +294,7 @@ class PlayState extends FlxState
 	function CollideBossAndBullet(b:Boss, p:BulletPlayer) //colision bala player y boss
 	{
 		bulletPlayerGroup.remove(p, true);
-		Reg.bossHP -= 10;
+		Reg.bossHP -= 4;
 	}
 
 	function CollideTileBullet(t:FlxTilemap,p:BulletPlayer) // colision entre tiles y bullet player
@@ -267,7 +305,11 @@ class PlayState extends FlxState
 	function CollideBulletAndEnemy(p:BulletPlayer,e:Enemy)  // colision entre bala player y enemigo
 	{
 		bulletPlayerGroup.remove(p, true);
+		FlxG.sound.play(AssetPaths.EnemyDeath__wav, 0.70);
 		enemyGroup.remove(e);
+		Reg.score += 50;
+		HUDscore.destroy();
+		ScoreTextDraw();
 		if (contaUpgrade >= 3)
 		{
 			upgradecito.reset(e.x, e.y);
@@ -303,6 +345,8 @@ class PlayState extends FlxState
 		HUDlivesText.scrollFactor.set(0, 0);
 		add(HUDlivesText);
 
+		ScoreTextDraw();
+
 		HUDSpeed = new FlxSprite(28, 224);
 		HUDSpeed.loadGraphic(AssetPaths.HUDspeed__png, true, 50, 16);
 		HUDSpeed.animation.add("idle", [1], 1, true);
@@ -337,12 +381,54 @@ class PlayState extends FlxState
 			if (bossito.alive == false)
 			{
 				bossito.revive();
-				bossHPBar = new FlxBar(FlxG.camera.scroll.x + 75,2, LEFT_TO_RIGHT, 150, 20, Reg, "bossHP", 0, 100);
+				bossHPBar = new FlxBar(FlxG.camera.scroll.x + 75, 203, LEFT_TO_RIGHT, 130, 20, Reg, "bossHP", 0, 100);
 				bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
 				add(bossHPBar);
 			}
-			if (Reg.bossHP == 0)
+			if (Reg.bossHP <= 0)
+			{
 				bossHPBar.destroy();
+			}
+		}
+	}
+
+	function EndScene()
+	{
+		if (countEnd > 10 * FlxG.updateFramerate * FlxG.elapsed)
+		{
+			countSwitch++;
+			countEnd = 0;
+		}
+		else
+			countEnd++;
+	
+
+		switch (countSwitch)
+		{
+			case 0:
+				endBackground.alpha = 0;
+			case 1:
+				endBackground.alpha = 0.1;
+			case 2:
+				endBackground.alpha = 0.2;
+			case 3:
+				endBackground.alpha = 0.3;
+			case 4:
+				endBackground.alpha = 0.4;
+			case 5:
+				endBackground.alpha = 0.5;
+			case 6:
+				endBackground.alpha = 0.6;
+			case 7:
+				endBackground.alpha = 0.7;
+			case 8:
+				endBackground.alpha = 0.8;
+			case 9:
+				endBackground.alpha = 0.9;
+			case 10:
+				endBackground.alpha = 1;
+			case 30:
+				FlxG.switchState(new GameOver());
 		}
 	}
 
@@ -358,5 +444,20 @@ class PlayState extends FlxState
 				tilemap.setTileProperties(i, FlxObject.ANY);
 		}
 		loader.loadEntities(placeEntities, "entities");
+	}
+
+	function ScoreTextDraw():Void
+	{
+		HUDscore = new FlxText(130, 0, 0, "Score: " + Reg.score, 16);
+		HUDscore.scrollFactor.set(0, 0);
+		add(HUDscore);
+	}
+
+	function UpdateScore():Void
+	{
+		if (Reg.score > Reg.HighScore)
+		{
+			Reg.HighScore = Reg.score;
+		}
 	}
 }

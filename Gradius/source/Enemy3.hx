@@ -64,6 +64,7 @@ class Enemy3 extends Enemy
 
 	public function Shoot()
 	{
+		FlxG.sound.play(AssetPaths.EnemyShoot__wav, 0.70,false);
 		balita = new BulletEnemy(x, y + height/2);
 		bulletGroupRef.add(balita);
 	}
