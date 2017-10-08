@@ -13,7 +13,7 @@ class MissilePlayer extends BulletPlayer
 	{
 		super(X, Y);
 		loadGraphic(AssetPaths.missile__png, true, 16, 16);
-		animation.add("anim", [0, 1], 6, true);
+		animation.add("anim", [0, 1,2,3], 6, true);
 	}
 	
 	override public function update(elapsed:Float):Void
@@ -21,7 +21,6 @@ class MissilePlayer extends BulletPlayer
 		super.update(elapsed);
 		animation.play("anim");
 		velocity.set((Reg.camVelocityX + 150) * Math.cos(FlxAngle.asDegrees(100)), 150 * Math.sin(FlxAngle.asDegrees(45)));
-		set_angle(45);
 	}
 	
 }

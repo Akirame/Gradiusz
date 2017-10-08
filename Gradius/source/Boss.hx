@@ -21,6 +21,8 @@ class Boss extends Enemy
 	public function new(?X:Float = 0, ?Y:Float = 0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
 		super(X, Y, SimpleGraphic, bulletGroup);
+		loadGraphic(AssetPaths.bossMoon__png, true, 64, 64);
+		animation.add("anim", [0, 1, 2, 3], 3, true);
 		bulletGroupRef = bulletGroup;
 		toDown = false;
 		countDown = 0;
@@ -31,6 +33,7 @@ class Boss extends Enemy
 	{
 		super.update(elapsed);
 		velocity.set(0, 0);
+		animation.play("anim");
 		OOB();
 		if (x <= FlxG.camera.scroll.x + FlxG.camera.width - 84)
 		{
@@ -47,22 +50,21 @@ class Boss extends Enemy
 
 	function Shoot()
 	{
-		if (countDown >= 1 * FlxG.updateFramerate)
+		if (countDown >= 0.7 * FlxG.updateFramerate)
 		{
-			var vel:Float = 150;
-
+			
 			balita = new BulletEnemy(x, y + height / 2);
-			balita.velocity.set( -vel, 0);
+			balita.velocity.set( -Reg.velocityBullet, 0);
 			bulletGroupRef.add(balita);
 
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.angle = 45;
-			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(-45)), vel * Math.sin(FlxAngle.asDegrees(-45)));
+			balita.velocity.set( Reg.velocityBullet * Math.cos(FlxAngle.asDegrees(-45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(-45)));
 			bulletGroupRef.add(balita);
 
 			balita = new BulletEnemy(x, y + height / 2);
 			balita.angle = -45;
-			balita.velocity.set( vel * Math.cos(FlxAngle.asDegrees(45)), vel * Math.sin(FlxAngle.asDegrees(45)));
+			balita.velocity.set( Reg.velocityBullet * Math.cos(FlxAngle.asDegrees(45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(45)));
 			bulletGroupRef.add(balita);
 
 			countDown = 0;

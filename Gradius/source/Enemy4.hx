@@ -5,21 +5,20 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxAngle;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import source.Reg;
-
 /**
  * ...
- * @author ...
+ * @author G
  */
-class Enemy2 extends Enemy
+class Enemy4 extends Enemy 
 {
-	private var balita:BulletEnemy;
+	var balita:BulletEnemy;
 	var bulletGroupRef:FlxTypedGroup<BulletEnemy>;
 	var count:Float = 0;
 
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
 		super(X, Y, SimpleGraphic, bulletGroup);
-		loadGraphic(AssetPaths.alien3__png, true, 16, 16);
+		loadGraphic(AssetPaths.alien4__png, true, 16, 16);
 		animation.add("anim", [0, 1, 2, 3], 6, true);
 		bulletGroupRef = bulletGroup;		
 	}
@@ -36,8 +35,8 @@ class Enemy2 extends Enemy
 		if ( count == 1 * FlxG.updateFramerate)
 		{		
 		balita = new BulletEnemy(x, y + height / 2);
-		balita.angle = 45;
-		balita.velocity.set (Reg.velocityBullet * Math.cos(FlxAngle.asDegrees( -45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(-45)));
+		balita.angle = -45;
+		balita.velocity.set (Reg.velocityBullet * Math.cos(FlxAngle.asDegrees( 45)), Reg.velocityBullet * Math.sin(FlxAngle.asDegrees(45)));
 		bulletGroupRef.add(balita);
 		count = 0;
 		}

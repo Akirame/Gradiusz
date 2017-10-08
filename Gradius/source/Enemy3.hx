@@ -20,6 +20,8 @@ class Enemy3 extends Enemy
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset, bulletGroup:FlxTypedGroup<BulletEnemy>)
 	{
 		super(X, Y, SimpleGraphic, bulletGroup);
+		loadGraphic(AssetPaths.alien2__png, true, 16, 16);
+		animation.add("anim", [0, 1, 2, 3], 6, true);
 		bulletGroupRef = bulletGroup;
 		countDown = 0;
 		acum = 0;
@@ -28,6 +30,7 @@ class Enemy3 extends Enemy
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+		animation.play("anim");
 		velocity.set(Reg.camVelocityX, 0);
 
 		if ( countDown == 50)

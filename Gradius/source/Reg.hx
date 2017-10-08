@@ -20,6 +20,7 @@ class Reg
 	static public var shieldbool:Bool = false;
 	static public var optionUpgrade:Bool = false;
 	static public var position:FlxPoint = new FlxPoint();
+	static public var velocityBullet:Float = 150;
 	
 	
 }

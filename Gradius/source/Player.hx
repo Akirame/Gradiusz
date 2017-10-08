@@ -18,7 +18,7 @@ class Player extends FlxSprite
 	public var bulletGroupRef(get, null):FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	private var playerMissile:MissilePlayer;
-	private var optionsito:Option;
+	public var optionsito:Option;
 	private var conta:Int = 0;
 
 	public function new(?X:Float = 0, ?Y:Float = 0, bulletGroup:FlxTypedGroup<BulletPlayer>)
@@ -28,7 +28,6 @@ class Player extends FlxSprite
 		delayShoot = Reg.delay;	
 		animations();
 		optionsito = new Option(0, 0, bulletGroup);
-		FlxG.state.add(optionsito);
 		optionsito.kill();
 	
 	}
@@ -139,9 +138,10 @@ class Player extends FlxSprite
 	{
 		if (Reg.countUpgrade > 5)
 			Reg.countUpgrade = 0;	
+		if (Reg.shieldbool == true && Reg.shieldUpgrade == 0)
+			Reg.shieldbool = false;
 		if (FlxG.keys.justPressed.X)
 		{
-		
 			switch (Reg.countUpgrade)
 			{
 			case 1:
