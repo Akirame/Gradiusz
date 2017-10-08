@@ -3,8 +3,10 @@ package;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.system.FlxAssets.FlxGraphicAsset;
+import Option;
+import flixel.input.keyboard.FlxKey;
 import source.Reg;
+import sys.ssl.Key;
 
 /**
  * ...
@@ -13,17 +15,22 @@ import source.Reg;
 class Player extends FlxSprite
 {
 	private var playerBullet:BulletPlayer;
-	public var bulletGroup(get, null):FlxTypedGroup<BulletPlayer>;
+	public var bulletGroupRef(get, null):FlxTypedGroup<BulletPlayer>;
 	private var delayShoot:Int;
 	private var playerMissile:MissilePlayer;
-	
+	private var optionsito:Option;
+	private var conta:Int = 0;
 
-	public function new(?X:Float=0, ?Y:Float=0)
+	public function new(?X:Float = 0, ?Y:Float = 0, bulletGroup:FlxTypedGroup<BulletPlayer>)
 	{
 		super(X, Y);
-		bulletGroup = new FlxTypedGroup();
+		bulletGroupRef = bulletGroup;
 		delayShoot = Reg.delay;	
 		animations();
+		optionsito = new Option(0, 0, bulletGroup);
+		FlxG.state.add(optionsito);
+		optionsito.kill();
+	
 	}
 
 	override public function update(elapsed:Float):Void
@@ -33,23 +40,25 @@ class Player extends FlxSprite
 		PlayerMovement();
 		Shoot();
 		OOB();
-		adquireUpgrade();
-		if (Reg.shieldUpgrade == 0)
-			animation.play("anim1");
-		else
-			animation.play("anim2");
+		AdquireUpgrade();
+		AnimationShield();
+		Reg.position.set(x-16, y+10);		
 	}
 
 	function PlayerMovement():Void
-	{
-		if (FlxG.keys.pressed.LEFT)
+	{		
+		if (FlxG.keys.pressed.LEFT)		
 			velocity.x -= Reg.shipVelocityX;
+		Reg.positionY = y;
 		if (FlxG.keys.pressed.RIGHT)
 			velocity.x += Reg.shipVelocityX;
+		Reg.positionY = y;
 		if (FlxG.keys.pressed.UP)
 			velocity.y -= Reg.shipVelocityY;
+		Reg.positionY = y;
 		if (FlxG.keys.pressed.DOWN)
 			velocity.y += Reg.shipVelocityY;
+		Reg.positionY = y;
 		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.DOWN)
 		{
 			velocity.x *= DiagonalVelocity();
@@ -83,11 +92,11 @@ class Player extends FlxSprite
 		if (FlxG.keys.justPressed.Z && delayShoot >= Reg.delay)
 		{
 			playerBullet = new BulletPlayer(x + width,y + height / 4); // experimental solamente para sprite de prueba
-			bulletGroup.add(playerBullet);
+			bulletGroupRef.add(playerBullet);
 			if (Reg.missileUpgrade)
 			{
 				playerMissile = new MissilePlayer(x + width, y + height / 4);
-				bulletGroup.add(playerMissile);
+				bulletGroupRef.add(playerMissile);
 			}
 			delayShoot = 0;
 		}
@@ -106,10 +115,10 @@ class Player extends FlxSprite
 		if ( y + height > FlxG.camera.scroll.y + FlxG.camera.height)
 			y = FlxG.camera.scroll.y + FlxG.camera.height - height;
 
-		for (bullet in bulletGroup)
+		for (bullet in bulletGroupRef)
 		{
 			if (bullet.x >= FlxG.camera.scroll.x + FlxG.camera.width || bullet.y >= FlxG.camera.scroll.y + FlxG.camera.height)
-				bulletGroup.remove(bullet, true);
+				bulletGroupRef.remove(bullet, true);
 		}
 	}
 
@@ -118,9 +127,9 @@ class Player extends FlxSprite
 		return ((Math.sqrt(Math.pow(Reg.shipVelocityX, 2) + Math.pow(Reg.shipVelocityY, 2))) / 2) / 100;
 	}
 
-	public function get_bulletGroup():FlxTypedGroup<BulletPlayer>
+	public function get_bulletGroupRef():FlxTypedGroup<BulletPlayer>
 	{
-		return bulletGroup;
+		return bulletGroupRef;
 	}
 
 	function animations():Void
@@ -130,7 +139,7 @@ class Player extends FlxSprite
 			animation.add("anim2", [4, 5, 6, 7], 16, true);
 	}
 	
-	function adquireUpgrade():Void 
+	function AdquireUpgrade():Void 
 	{
 		if (FlxG.keys.justPressed.X)
 		{
@@ -147,10 +156,18 @@ class Player extends FlxSprite
 					Reg.missileUpgrade = true;
 					Reg.countUpgrade = 0;
 				case 4:
-					Reg.optionUpgrade = true;
+					optionsito.reset(x - 16, y + 16);
 					Reg.countUpgrade = 0;
 			}
 		}
+	}
+	
+	function AnimationShield():Void 
+	{
+		if (Reg.shieldUpgrade == 0)
+			animation.play("anim1");
+		else
+			animation.play("anim2");	
 	}
 
 }

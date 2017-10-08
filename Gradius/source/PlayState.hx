@@ -23,19 +23,24 @@ class PlayState extends FlxState
 	private var backGround2:FlxBackdrop;
 	private var bossito:Boss;
 	private var bulletGroup:FlxTypedGroup<BulletEnemy>;
-	var upgradecito:Upgrade;
-	var bossHPBar:FlxBar;
+	private var bulletPlayerGroup:FlxTypedGroup<BulletPlayer>;
+	private	var upgradecito:Upgrade;
+	private	var bossHPBar:FlxBar;
 	
 	override public function create():Void
 	{
 		super.create();
-		backGround = new FlxBackdrop(AssetPaths.spaceBackground__png);
-		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5,0.5);
-		
 		Init();
 		FlxG.worldBounds.set(2400, 240);
+		
+		backGround = new FlxBackdrop(AssetPaths.spaceBackground__png);
+		backGround2 = new FlxBackdrop(AssetPaths.spaceBackground2__png, 0.5,0.5);
+		add(backGround);
+		add(backGround2);
+		
 		enemyGroup = new FlxTypedGroup<Enemy>();
 		bulletGroup = new FlxTypedGroup<BulletEnemy>();
+		bulletPlayerGroup = new FlxTypedGroup<BulletPlayer>();
 
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles2__png, 16, 16, "tiles");
@@ -55,15 +60,12 @@ class PlayState extends FlxState
 
 		upgradecito = new Upgrade(200, 50);
 		
-
 		add(followPoint);
-		add(backGround);
-		add(backGround2);
 		add(tilemap);
-		add(p1);
-		add(p1.bulletGroup);
+		add(p1);				
 		add(enemyGroup);
 		add(bossito);
+		add(bulletPlayerGroup);
 		add(bulletGroup);
 		add(upgradecito);
 	}
@@ -111,7 +113,7 @@ class PlayState extends FlxState
 		switch (entityName)
 		{
 			case "player":
-				p1 = new Player(x, y);
+				p1 = new Player(x, y, bulletPlayerGroup);
 			case "enemy1":
 				var e:Enemy1 = new Enemy1(x, y, null, bulletGroup);
 				e.makeGraphic(16, 16, 0xFF0000FF);
@@ -170,10 +172,10 @@ class PlayState extends FlxState
 	function Collides():Void
 	{
 		FlxG.collide(tilemap, p1, CollideTilePlayer); // colision entre tiles y player
-		FlxG.collide(tilemap, p1.bulletGroup, CollideTileBullet); // colision entre tiles y bullet
-		FlxG.collide(p1.bulletGroup, enemyGroup, CollideBulletAndEnemy); //colision entre balas y enemigos
-		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy); // coliision entre enemigos y player
-		FlxG.overlap(bossito, p1.bulletGroup, CollideBossAndBullet); // colision boss y bullet
+		FlxG.collide(tilemap, bulletPlayerGroup, CollideTileBullet); // colision entre tiles y bullet
+		FlxG.collide(bulletPlayerGroup, enemyGroup, CollideBulletAndEnemy); //colision entre bullet player y enemigos
+		FlxG.overlap(bossito, bulletPlayerGroup, CollideBossAndBullet); // colision boss y bullet player
+		FlxG.collide(enemyGroup, p1, CollidePlayerEnemy); // colision entre enemigos y player
 		FlxG.collide(bulletGroup, p1, CollideEnemyBulletAndPlayer); // colision entre bala enemiga y player
 		FlxG.overlap(upgradecito, p1, CollidePlayerUpgrade); // colision entre uptrade y player
 		FlxG.collide(bossito, p1, CollideBossAndPlayer); // colision entre boss y player
@@ -183,7 +185,7 @@ class PlayState extends FlxState
 	{
 		u.destroy();
 		if (Reg.countUpgrade < 5)
-			Reg.countUpgrade += 2;
+			Reg.countUpgrade++;
 		else
 			Reg.countUpgrade = 0;
 	}
@@ -197,18 +199,18 @@ class PlayState extends FlxState
 	
 	function CollideBossAndBullet(b:Boss, p:BulletPlayer) //colision bala player y boss
 	{
-		p1.bulletGroup.remove(p);
+		bulletPlayerGroup.remove(p, true);
 		Reg.bossHP -= 10;
 	}
 
-	function CollideTileBullet(t:FlxTilemap,b:BulletPlayer) // colision entre tiles y bullet player
+	function CollideTileBullet(t:FlxTilemap,p:BulletPlayer) // colision entre tiles y bullet player
 	{
-		p1.bulletGroup.remove(b,true);
+		bulletPlayerGroup.remove(p, true);
 	}
 
-	function CollideBulletAndEnemy(b:BulletPlayer,e:Enemy)  // colision entre bala player y enemigo
+	function CollideBulletAndEnemy(p:BulletPlayer,e:Enemy)  // colision entre bala player y enemigo
 	{
-		p1.bulletGroup.remove(b,true);
+		bulletPlayerGroup.remove(p, true);
 		enemyGroup.remove(e);
 	}
 	
