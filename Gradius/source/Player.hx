@@ -49,16 +49,12 @@ class Player extends FlxSprite
 	{		
 		if (FlxG.keys.pressed.LEFT)		
 			velocity.x -= Reg.shipVelocityX;
-		Reg.positionY = y;
 		if (FlxG.keys.pressed.RIGHT)
 			velocity.x += Reg.shipVelocityX;
-		Reg.positionY = y;
 		if (FlxG.keys.pressed.UP)
 			velocity.y -= Reg.shipVelocityY;
-		Reg.positionY = y;
 		if (FlxG.keys.pressed.DOWN)
 			velocity.y += Reg.shipVelocityY;
-		Reg.positionY = y;
 		if (FlxG.keys.pressed.LEFT && FlxG.keys.pressed.DOWN)
 		{
 			velocity.x *= DiagonalVelocity();
@@ -141,23 +137,41 @@ class Player extends FlxSprite
 	
 	function AdquireUpgrade():Void 
 	{
+		if (Reg.countUpgrade > 5)
+			Reg.countUpgrade = 0;	
 		if (FlxG.keys.justPressed.X)
 		{
+		
 			switch (Reg.countUpgrade)
 			{
-				case 1:
-					Reg.shipVelocityX += 30;
-					Reg.shipVelocityX += 30;
+			case 1:
+				if (Reg.countSpeed != 2)
+				{
+					Reg.shipVelocityX += 10;
+					Reg.shipVelocityY += 10;
 					Reg.countUpgrade = 0;
+					Reg.countSpeed++;
+				}
 				case 2:
+					if (Reg.shieldbool == false)
+					{
+					Reg.shieldbool = true;
 					Reg.shieldUpgrade = 2;
 					Reg.countUpgrade = 0;
+					}
 				case 3:
+					if (Reg.missileUpgrade != true)
+					{
 					Reg.missileUpgrade = true;
 					Reg.countUpgrade = 0;
+					}
 				case 4:
+					if (optionsito.alive == false)
+					{
+					Reg.optionUpgrade = true;
 					optionsito.reset(x - 16, y + 16);
 					Reg.countUpgrade = 0;
+					}
 			}
 		}
 	}

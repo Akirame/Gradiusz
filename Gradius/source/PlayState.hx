@@ -6,7 +6,6 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.addons.display.FlxBackdrop;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.system.debug.interaction.tools.Eraser.GraphicEraserTool;
 import flixel.tile.FlxTilemap;
 import flixel.ui.FlxBar;
 import source.Reg;
@@ -26,6 +25,11 @@ class PlayState extends FlxState
 	private var bulletPlayerGroup:FlxTypedGroup<BulletPlayer>;
 	private	var upgradecito:Upgrade;
 	private	var bossHPBar:FlxBar;
+	private var HUDSpeed:FlxSprite;
+	private var HUDShield:FlxSprite;
+	private var HUDMissile:FlxSprite;
+	private var HUDOption:FlxSprite;
+	private var contaUpgrade:Int;
 	
 	override public function create():Void
 	{
@@ -41,6 +45,8 @@ class PlayState extends FlxState
 		enemyGroup = new FlxTypedGroup<Enemy>();
 		bulletGroup = new FlxTypedGroup<BulletEnemy>();
 		bulletPlayerGroup = new FlxTypedGroup<BulletPlayer>();
+		upgradecito = new Upgrade(0, 0);
+		upgradecito.kill();
 
 		loader = new FlxOgmoLoader(AssetPaths.level1__oel);
 		tilemap = loader.loadTilemap(AssetPaths.tiles2__png, 16, 16, "tiles");
@@ -57,17 +63,35 @@ class PlayState extends FlxState
 		followPoint.makeGraphic(1, 1, 0x00000000);
 		followPoint.velocity.x = Reg.camVelocityX;
 		FlxG.camera.follow(followPoint);
+		
+		InitHUD();
 
-		upgradecito = new Upgrade(200, 50);
+		
 		
 		add(followPoint);
 		add(tilemap);
+		add(HUDSpeed);
+		add(HUDShield);
+		add(HUDMissile);
+		add(HUDOption);
 		add(p1);				
 		add(enemyGroup);
 		add(bossito);
 		add(bulletPlayerGroup);
 		add(bulletGroup);
 		add(upgradecito);
+	}
+	
+	
+
+	override public function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+		HUDUpdate();
+		GameOver();
+		RespawnEnemy();
+		Collides();
+		BossRespawn();
 	}
 	
 	function Init() 
@@ -77,31 +101,69 @@ class PlayState extends FlxState
 		Reg.missileUpgrade = false;
 		Reg.optionUpgrade = false;
 		Reg.shieldUpgrade = 0;
+		Reg.shieldbool = false;
 		Reg.shipVelocityX  = 100;
 		Reg.shipVelocityY = 100;
 		Reg.bossHP = 100;
+		Reg.countSpeed = 0;
+		contaUpgrade = 0;
 	}
-
-	override public function update(elapsed:Float):Void
+	
+	function HUDUpdate() 
 	{
-		super.update(elapsed);
-		GameOver();
-		RespawnEnemy();
-		Collides();
-
-		if (followPoint.x >= tilemap.width - 2200 )
+	
+		if (Reg.countSpeed == 2)
 		{
-			Reg.camVelocityX = 0;
-			followPoint.velocity.x = Reg.camVelocityX;
-			if (bossito.alive == false)
-			{
-				bossito.revive();
-				bossHPBar = new FlxBar((FlxG.camera.scroll.x + FlxG.camera.width-75)/2,2, LEFT_TO_RIGHT, 150, 20, Reg, "bossHP", 0, 100);
-				bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
-				add(bossHPBar);
-			}
-			if (Reg.bossHP == 0)
-				bossHPBar.destroy();
+			HUDSpeed.animation.add("idle", [0], 1, true);
+			HUDSpeed.animation.add("active", [3], 1, true);
+		}
+		if (Reg.shieldbool == true)
+		{
+			HUDShield.animation.add("idle", [0], 1, true);
+			HUDShield.animation.add("active", [3], 1, true);
+		}
+		else
+		{
+			HUDShield.animation.add("idle", [1], 1, true);
+			HUDShield.animation.add("active", [2], 1, true);
+		}
+		if (Reg.missileUpgrade == true)
+		{
+			HUDMissile.animation.add("idle", [0], 1, true);
+			HUDMissile.animation.add("active", [3], 1, true);
+		}
+		if (Reg.optionUpgrade == true)
+		{
+			HUDOption.animation.add("idle", [0], 1, true);
+			HUDOption.animation.add("active", [3], 1, true);
+		}
+		switch (Reg.countUpgrade) 
+		{
+			case 1:
+				HUDSpeed.animation.play("active");
+				HUDShield.animation.play("idle");
+				HUDMissile.animation.play("idle");
+				HUDOption.animation.play("idle");
+			case 2:
+				HUDSpeed.animation.play("idle");
+				HUDShield.animation.play("active");
+				HUDMissile.animation.play("idle");
+				HUDOption.animation.play("idle");
+			case 3:
+				HUDSpeed.animation.play("idle");
+				HUDShield.animation.play("idle");
+				HUDMissile.animation.play("active");
+				HUDOption.animation.play("idle");
+			case 4:
+				HUDSpeed.animation.play("idle");
+				HUDShield.animation.play("idle");
+				HUDMissile.animation.play("idle");
+				HUDOption.animation.play("active");
+			default:
+				HUDSpeed.animation.play("idle");
+				HUDShield.animation.play("idle");
+				HUDMissile.animation.play("idle");
+				HUDOption.animation.play("idle");
 		}
 	}
 
@@ -144,8 +206,11 @@ class PlayState extends FlxState
 		{
 			if ( (enemy.x <= (FlxG.camera.scroll.x + FlxG.camera.width + 10)) && enemy.alive == false)
 				enemy.revive();
-			if ((enemy.x >=  FlxG.camera.scroll.x + FlxG.camera.width + 30 || enemy.x <= FlxG.camera.scroll.x-20) && enemy.alive)
+			if ((enemy.x >=  FlxG.camera.scroll.x + FlxG.camera.width + 30 || enemy.x <= FlxG.camera.scroll.x - 20) && enemy.alive)
+			{
 				enemyGroup.remove(enemy, true);
+				contaUpgrade = 0;
+			}
 		}
 	}
 	
@@ -171,7 +236,7 @@ class PlayState extends FlxState
 
 	function Collides():Void
 	{
-		FlxG.collide(tilemap, p1, CollideTilePlayer); // colision entre tiles y player
+		FlxG.collide(tilemap, p1, CollideTilePlayer); // colision en	tre tiles y player
 		FlxG.collide(tilemap, bulletPlayerGroup, CollideTileBullet); // colision entre tiles y bullet
 		FlxG.collide(bulletPlayerGroup, enemyGroup, CollideBulletAndEnemy); //colision entre bullet player y enemigos
 		FlxG.overlap(bossito, bulletPlayerGroup, CollideBossAndBullet); // colision boss y bullet player
@@ -183,9 +248,9 @@ class PlayState extends FlxState
 
 	function CollidePlayerUpgrade(u:Upgrade, p:Player) //colision entre upgrade y player
 	{
-		u.destroy();
+		u.kill();
 		if (Reg.countUpgrade < 5)
-			Reg.countUpgrade++;
+			Reg.countUpgrade++;			
 		else
 			Reg.countUpgrade = 0;
 	}
@@ -212,6 +277,14 @@ class PlayState extends FlxState
 	{
 		bulletPlayerGroup.remove(p, true);
 		enemyGroup.remove(e);
+		if (contaUpgrade >= 3)
+		{
+			upgradecito.reset(e.x, e.y);
+			contaUpgrade = 0;
+		}
+		else
+			contaUpgrade++;
+		
 	}
 	
 	function CollideBossAndPlayer(b:Boss, p:Player) //colision player y boss
@@ -227,5 +300,50 @@ class PlayState extends FlxState
 	function CollideTilePlayer(t:FlxTilemap,p:Player):Void	// colision entre player y tiles
 	{
 		PlayerDeath();
+	}
+	
+	function InitHUD():Void 
+	{
+		HUDSpeed = new FlxSprite(28, 200);
+		HUDSpeed.loadGraphic(AssetPaths.HUDspeed__png, true, 50, 16);
+		HUDSpeed.animation.add("idle", [1], 1, true);
+		HUDSpeed.animation.add("active", [2], 1, true);
+		HUDSpeed.scrollFactor.set(0, 0);
+		
+		HUDShield = new FlxSprite(78, 200);
+		HUDShield.loadGraphic(AssetPaths.HUDshield__png, true, 50, 16);
+		HUDShield.animation.add("idle", [1], 1, true);
+		HUDShield.animation.add("active", [2], 1, true);
+		HUDShield.scrollFactor.set(0, 0);
+		
+		HUDMissile = new FlxSprite(128, 200);
+		HUDMissile.loadGraphic(AssetPaths.HUDmissile__png, true, 50, 16);				
+		HUDMissile.animation.add("idle", [1], 1, true);
+		HUDMissile.animation.add("active", [2], 1, true);
+		HUDMissile.scrollFactor.set(0, 0);
+		
+		HUDOption = new FlxSprite(178, 200);
+		HUDOption.loadGraphic(AssetPaths.HUDoption__png, true, 50, 16);
+		HUDOption.animation.add("idle", [1], 1, true);
+		HUDOption.animation.add("active", [2], 1, true);
+		HUDOption.scrollFactor.set(0, 0);		
+	}
+	
+	function BossRespawn():Void 
+	{
+		if (followPoint.x >= tilemap.width - 200 )
+		{
+			Reg.camVelocityX = 0;
+			followPoint.velocity.x = Reg.camVelocityX;
+			if (bossito.alive == false)
+			{
+				bossito.revive();
+				bossHPBar = new FlxBar((FlxG.camera.scroll.x + FlxG.camera.width-75)/2,2, LEFT_TO_RIGHT, 150, 20, Reg, "bossHP", 0, 100);
+				bossHPBar.createFilledBar(0xFF000000, 0xFFFF0000, true, 0xFF00FF00);
+				add(bossHPBar);
+			}
+			if (Reg.bossHP == 0)
+				bossHPBar.destroy();
+		}
 	}
 }

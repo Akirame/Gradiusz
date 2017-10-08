@@ -21,7 +21,7 @@ class Upgrade extends FlxSprite
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		velocity.set(Reg.camVelocityX - 20, 0);
+		velocity.set(Reg.camVelocityX - 50, 0);
 		animation.play("anim");
 
 		OOB();
